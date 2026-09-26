@@ -16,9 +16,13 @@ if (!process.env.MONGO_URI) {
 // CORS configuration: allow cross-origin requests from frontend
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, Postman) and any incoming frontend origin
+      callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With", "Origin"],
+    credentials: true,
   })
 );
 
@@ -107,19 +111,22 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\nGracefully shutting down...");
+const handleShutdown = (signal) => {
+  console.log(`\nReceived ${signal}. Gracefully shutting down...`);
   server.close(() => {
     mongoose.connection.close(false).then(() => {
       console.log("MongoDB connection closed.");
       process.exit(0);
     });
   });
-});
+};
+
+process.on("SIGINT", () => handleShutdown("SIGINT"));
+process.on("SIGTERM", () => handleShutdown("SIGTERM"));
 
 module.exports = app;

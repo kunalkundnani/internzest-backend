@@ -2,7 +2,7 @@
   "name": "internzest-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "node run_suite.js",
     "dev": "nodemon server.js",

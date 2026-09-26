@@ -13,7 +13,7 @@ server.stdout.on("data", (data) => {
   const text = data.toString();
   process.stdout.write("[SERVER]: " + text);
 
-  if (text.includes("Server running on http://localhost:5000") && !serverStarted) {
+  if ((text.includes("Server running on port") || text.includes("Server running on")) && !serverStarted) {
     serverStarted = true;
     console.log("\nBackend server is listening. Running test suite...\n");
 
